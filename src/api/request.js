@@ -1,4 +1,4 @@
-import {request, requestAuth} from './authApi.js'
+import {request, requestAuth} from './api.js'
 import { message } from 'antd';
 
 export async function signUp(data) {

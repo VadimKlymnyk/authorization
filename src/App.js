@@ -3,7 +3,7 @@ import Auth from './components/Auth.js';
 import Profile from './components/Profile.js';
 import './App.css';
 import { BrowserRouter ,Router, Switch, Route, Redirect } from "react-router-dom";
-import history from "./components/utils/history.js";
+import history from "./utils/history.js";
 
 function App() {  
 

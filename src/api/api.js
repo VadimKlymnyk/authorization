@@ -1,4 +1,4 @@
-import {forwardTo} from "./utils.js";
+import {forwardTo} from "../utils/utils.js";
 import { message } from 'antd';
 
 const URL = 'http://142.93.134.108:1111'
@@ -81,5 +81,5 @@ export const requestAuth = async (path, method) => {
         message.error(json.body.message)
         throw new Error(json.body.message)
     }
-    return response.ok || response.status < 400 ? json : Promise.reject(json.error);  
+    return response.ok ? json : Promise.reject(json.error);  
 }

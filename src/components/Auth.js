@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import { Button, Form, Input } from 'antd';
-import { signUp, login } from './utils/auth.js';
-import {forwardTo} from "./utils/utils.js";
+import { signUp, login } from '../api/request.js';
+import {forwardTo} from "../utils/utils.js";
 import '../App.css';
 
 function Auth() {
@@ -24,7 +24,7 @@ function Auth() {
   const onSignUp = async () => {
     try {
         const values = await form.validateFields();
-        const response = await signUp(values)
+        signUp(values)
     } catch (errorInfo) {
         console.log('Failed:', errorInfo);
     }
@@ -67,10 +67,10 @@ function Auth() {
         <Form.Item >
         <div className='button-area'>
             <Button type="primary"  onClick={onSignUp} className="login-form-button">
-            Sign up
+                Sign up
             </Button>
             <Button type="primary"  onClick={onLogin} className="login-form-button">
-            Login
+                Login
             </Button>
         </div>
         </Form.Item>

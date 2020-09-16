@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Button, Typography  } from 'antd';
-import { getInfo } from './utils/auth.js';
-import {forwardTo} from "./utils/utils.js";
+import { getInfo } from '../api/request.js';
+import {forwardTo} from "../utils/utils.js";
 import '../App.css';
 
 function Profile() {
