@@ -1,4 +1,5 @@
 import {request, requestAuth} from './api.js'
+import {forwardTo} from "../utils/utils.js";
 import { message } from 'antd';
 
 export async function signUp(data) {
@@ -44,7 +45,7 @@ export async function getInfo() {
         const response = await requestAuth('/me', 'GET')
         return response
     } catch (e) {
-        console.log(e)
-
+        forwardTo('/signup')
+        message.error('Помилка');
     }
 }
