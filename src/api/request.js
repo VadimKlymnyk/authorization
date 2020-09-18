@@ -46,6 +46,6 @@ export async function getInfo() {
         return response
     } catch (e) {
         forwardTo('/signup')
-        message.error('Помилка');
+        message.error(e.message);
     }
 }

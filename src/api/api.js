@@ -1,6 +1,3 @@
-import {forwardTo} from "../utils/utils.js";
-import { message } from 'antd';
-
 const URL = 'http://142.93.134.108:1111'
 
 export const request =  async (path, method, data) => {
@@ -36,9 +33,7 @@ export const requestAuth = async (path, method) => {
     if (localStorage.authToken) {
         tokenData = JSON.parse(localStorage.authToken);
     } else {
-        forwardTo('/signup')
         const error = new Error('The token is missing')
-        message.error('The token is missing');
         error.name = "AuthError"
         throw error
     }
@@ -56,12 +51,9 @@ export const requestAuth = async (path, method) => {
                 tokenData = newTokensData
 
             } catch (e) {
-                forwardTo('/signup')
                 const error = new Error("Can not update token")
-                message.error("Can not update token");
                 error.name = "AuthError"
                 throw error
-
             }
         }
         bearer = `Bearer ${tokenData.access_token}`;
@@ -77,8 +69,6 @@ export const requestAuth = async (path, method) => {
     });
     const json = await response.json();
     if (json.statusCode === 401) {
-        forwardTo('/signup')
-        message.error(json.body.message)
         throw new Error(json.body.message)
     }
     return response.ok ? json : Promise.reject(json.error);  
