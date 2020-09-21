@@ -30,8 +30,12 @@ export const requestAuth = async (path, method) => {
 
     let tokenData = null;
     let bearer = null;
-    if (localStorage.authToken) {
-        tokenData = JSON.parse(localStorage.authToken);
+    if (localStorage.access_token && localStorage.expires_in && localStorage.refresh_token) {
+        tokenData = {
+            access_token: localStorage.access_token,
+            expires_in: localStorage.expires_in,
+            refresh_token: localStorage.refresh_token,
+        };
     } else {
         const error = new Error('The token is missing')
         error.name = "AuthError"
@@ -42,13 +46,14 @@ export const requestAuth = async (path, method) => {
             try {
                 const newToken = await refreshToken(tokenData.refresh_token);
                 const { body } = newToken
-                const newTokensData = {
+                localStorage.setItem("access_token", body.access_token);
+                localStorage.setItem("expires_in", Date.now()+60000);
+                localStorage.setItem("refresh_token", body.refresh_token);
+                tokenData = {
                     access_token: body.access_token,
                     expires_in: Date.now()+60000,
-                    refresh_token: body.refresh_token
-                }
-                localStorage.setItem("authToken", JSON.stringify(newTokensData));
-                tokenData = newTokensData
+                    refresh_token: body.refresh_token,
+                };
 
             } catch (e) {
                 const error = new Error("Can not update token")
@@ -68,8 +73,8 @@ export const requestAuth = async (path, method) => {
         "method": method,
     });
     const json = await response.json();
-    if (json.statusCode === 401) {
-        throw new Error(json.body.message)
+    if (json.statusCode === 401 || json.status === "error") {
+        throw new Error(json.message || json.body.message)
     }
     return response.ok ? json : Promise.reject(json.error);  
 }

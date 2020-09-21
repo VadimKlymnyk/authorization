@@ -22,12 +22,9 @@ export async function login(data) {
         const response = await request(`/login?email=${data.email}&password=${data.password}`, 'POST');
         if(response.statusCode === 200){
             const { body } = response
-            const newTokensData = {
-                access_token: body.access_token,
-                expires_in: Date.now()+60000,
-                refresh_token: body.refresh_token
-            }
-            localStorage.setItem("authToken", JSON.stringify(newTokensData));
+            localStorage.setItem("access_token", body.access_token);
+            localStorage.setItem("expires_in", Date.now()+60000);
+            localStorage.setItem("refresh_token", body.refresh_token);
             return true
         }else{
             message.error(response.message || response.body.message);

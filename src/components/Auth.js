@@ -8,7 +8,9 @@ function Auth() {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('expires_in');
+    localStorage.removeItem('refresh_token');
   }, []);
 
   const onLogin = async () => {
