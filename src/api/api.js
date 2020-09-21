@@ -1,80 +1,44 @@
-const URL = 'http://142.93.134.108:1111'
+const axios = require('axios');
+export const axiosApiInstance  = axios.create({baseURL: "http://142.93.134.108:1111", });
 
-export const request =  async (path, method, data) => {
-    const response = await fetch(URL+path, {
-            "method": method,
-            "headers": { "Content-Type": "application/json",},
-            "body": JSON.stringify(data)
-    })
-    const json = await response.json();
-    return response.ok ? json : Promise.reject(json.error); 
-}
-
-const refreshToken =  async (refresh_token) => {
-    const bearer = `Bearer ${refresh_token}`;
-
-    const response = await fetch(URL+'/refresh', {
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            'Authorization': bearer,
-        },
-        method: "POST",
-    });
-
-    const json = await response.json();
-    return response.ok ? json : Promise.reject(json.error);
-}
-
-export const requestAuth = async (path, method) => {
-
-    let tokenData = null;
-    let bearer = null;
-    if (localStorage.access_token && localStorage.expires_in && localStorage.refresh_token) {
-        tokenData = {
-            access_token: localStorage.access_token,
-            expires_in: localStorage.expires_in,
-            refresh_token: localStorage.refresh_token,
-        };
-    } else {
-        const error = new Error('The token is missing')
-        error.name = "AuthError"
-        throw error
-    }
-    if (tokenData) {
-        if (Date.now() >= tokenData.expires_in) {
-            try {
-                const newToken = await refreshToken(tokenData.refresh_token);
-                const { body } = newToken
-                localStorage.setItem("access_token", body.access_token);
-                localStorage.setItem("expires_in", Date.now()+60000);
-                localStorage.setItem("refresh_token", body.refresh_token);
-                tokenData = {
-                    access_token: body.access_token,
-                    expires_in: Date.now()+60000,
-                    refresh_token: body.refresh_token,
-                };
-
-            } catch (e) {
-                const error = new Error("Can not update token")
-                error.name = "AuthError"
-                throw error
-            }
+axiosApiInstance.interceptors.request.use(
+    config => {
+        const access_token = localStorage.access_token;
+        const refresh_token = localStorage.refresh_token;
+        if (access_token && config.url !== "/refresh") {
+            config.headers['Authorization'] = `Bearer ${access_token}`;
         }
-        bearer = `Bearer ${tokenData.access_token}`;
-    }
-
-    const response = await fetch(URL+path, {
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            'Authorization': bearer,
-        },
-        "method": method,
+        if (refresh_token && config.url === "/refresh") {
+            config.headers['Authorization'] = `Bearer ${refresh_token}`;
+        }
+        return config;
+    },
+    error => {
+        Promise.reject(error)
     });
-    const json = await response.json();
-    if (json.statusCode === 401 || json.status === "error") {
-        throw new Error(json.message || json.body.message)
+
+const refreshToken =  async () => {
+    const response = await axiosApiInstance.post('/refresh');
+    const { body } = response.data
+    if(response.data.statusCode === 200){
+        localStorage.setItem("access_token", body.access_token);
+        localStorage.setItem("refresh_token", body.refresh_token);
+        return axiosApiInstance.get('/me');
     }
-    return response.ok ? json : Promise.reject(json.error);  
 }
+
+axiosApiInstance.interceptors.response.use(
+    config => {
+      if(config.config.url === "/me" ){
+        if(config.data.statusCode === 401 || config.data.status === 'error'){
+            return refreshToken()
+        }   
+      }
+
+      if(config.data.status === 'error' || config.data.status_code === 401 || config.data.statusCode === 401){
+        throw new Error(config.data.message || config.data.body.message)
+      }
+      return config;
+    }
+  );
+

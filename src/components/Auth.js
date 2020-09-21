@@ -9,7 +9,6 @@ function Auth() {
 
   useEffect(() => {
     localStorage.removeItem('access_token');
-    localStorage.removeItem('expires_in');
     localStorage.removeItem('refresh_token');
   }, []);
 

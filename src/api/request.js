@@ -1,37 +1,30 @@
-import {request, requestAuth} from './api.js'
+import {axiosApiInstance} from './api.js'
 import {forwardTo} from "../utils/utils.js";
 import { message } from 'antd';
 
+
+
 export async function signUp(data) {
     try {
-        const response = await request('/sign_up', 'POST',  data );
-        if(response && response.status==='Ok'){
-            message.success('Користувач зареєстрований');
-            return true
-        }
-        message.error('Помилка реєстрації');
-        return false
+        const response = await axiosApiInstance.post("/sign_up", data);
+        message.success(response.data.message);
     } catch (e) {
-        console.log(e)
+        message.error(e.message)
     }
     return false
 }
 
 export async function login(data) {
     try {
-        const response = await request(`/login?email=${data.email}&password=${data.password}`, 'POST');
-        if(response.statusCode === 200){
-            const { body } = response
+        const response = await axiosApiInstance.post(`/login?email=${data.email}&password=${data.password}`);
+        if(response.data.statusCode === 200){
+            const { body } = response.data
             localStorage.setItem("access_token", body.access_token);
-            localStorage.setItem("expires_in", Date.now()+60000);
             localStorage.setItem("refresh_token", body.refresh_token);
             return true
-        }else{
-            message.error(response.message || response.body.message);
         }
-        
     } catch (e) {
-        console.log(e)
+        message.error(e.message)
     }
     return false
     
@@ -39,8 +32,8 @@ export async function login(data) {
 
 export async function getInfo() {
     try {
-        const response = await requestAuth('/me', 'GET')
-        return response
+        const response = await axiosApiInstance.get('/me');
+        return response.data
     } catch (e) {
         forwardTo('/signup')
         message.error(e.message);

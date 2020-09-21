@@ -19,7 +19,6 @@ function Profile() {
     const onLogout = () => {
         setText('')
         localStorage.removeItem('access_token');
-        localStorage.removeItem('expires_in');
         localStorage.removeItem('refresh_token');
         forwardTo('/signup')
     }
