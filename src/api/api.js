@@ -23,15 +23,15 @@ const refreshToken =  async () => {
     if(response.data.statusCode === 200){
         localStorage.setItem("access_token", body.access_token);
         localStorage.setItem("refresh_token", body.refresh_token);
-        return axiosApiInstance.get('/me');
     }
 }
 
 axiosApiInstance.interceptors.response.use(
-    config => {
-      if(config.config.url === "/me" ){
+    async config => {
+      if(config.config.url !== "/refresh" && config.config.url !== "/sign_up" && !config.config.url.includes("/login")){
         if(config.data.statusCode === 401 || config.data.status === 'error'){
-            return refreshToken()
+            await refreshToken()
+            return axiosApiInstance(config.config)
         }   
       }
 
